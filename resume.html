@@ -112,10 +112,10 @@ body{background:var(--paper);color:var(--ink);font-family:var(--sans);
 }
 
 /* ============ 打印（紧凑两页版，仅打印时生效） ============ */
-@page{size:A4;margin:10mm 11mm}
+@page{size:A4;margin:9mm 10mm}
 @media print{
   html,body{background:#fff}
-  body{font-size:13.0px;line-height:1.402;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body{font-size:15.6px;line-height:1.36;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .tools{display:none}
   .page{max-width:none;padding:0}
 
@@ -123,44 +123,44 @@ body{background:var(--paper);color:var(--ink);font-family:var(--sans);
   .head{padding-bottom:16px}
   .head-grid{grid-template-columns:170px 1fr;gap:22px}
   .portrait{width:72px;height:72px;border-width:1px;box-shadow:none}
-  .side-col h1{font-size:24.7px;margin-top:8px}
-  .contact{margin-top:7px;font-size:12.2px;line-height:1.6}
+  .side-col h1{font-size:29.6px;margin-top:8px}
+  .contact{margin-top:7px;font-size:14.6px;line-height:1.6}
   .intro{padding:12px 15px}
   .intro-h{margin-bottom:8px}
-  .intro-h h2{font-size:18.2px}
-  .intro p{font-size:12.5px;margin-bottom:6px;line-height:1.40}
+  .intro-h h2{font-size:21.9px}
+  .intro p{font-size:15.0px;margin-bottom:6px;line-height:1.36}
   .intro strong{font-weight:600}
   .keys{margin-top:8px;gap:5px}
-  .key{font-size:11.7px;padding:2px 9px}
+  .key{font-size:14.0px;padding:2px 9px}
 
   /* 板块标题压缩 */
   .sec-title{margin:20px 0 15px}
   .sec-title.sep{border-top:1px solid var(--line);padding-top:16px;margin-top:20px}
-  .sec-title h2{font-size:18.2px}
-  .sec-title .en{font-size:11.7px;margin-left:8px}
+  .sec-title h2{font-size:21.9px}
+  .sec-title .en{font-size:14.0px;margin-left:8px}
 
   /* 教育压缩 */
-  .edu-line{margin-bottom:5px;font-size:12.7px;line-height:1.40}
-  .edu-date{font-size:11.7px}
+  .edu-line{margin-bottom:5px;font-size:15.2px;line-height:1.36}
+  .edu-date{font-size:14.0px}
 
   /* 工作经历压缩 */
   .job{padding-left:15px;margin-bottom:18px}
   .job::before{top:12px;bottom:4px}
   .job::after{top:6px;width:5px;height:5px}
   .job-head{gap:4px 10px}
-  .job-head .co{font-size:16.9px}
-  .job-head .role{font-size:13.0px}
-  .job-head .date{font-size:11.7px}
+  .job-head .co{font-size:20.4px}
+  .job-head .role{font-size:15.6px}
+  .job-head .date{font-size:14.0px}
   .proj{margin-top:10px;padding:10px 12px;border-radius:5px;box-shadow:none}
-  .proj h3{font-size:13.0px;margin-bottom:5px;line-height:1.35}
-  .proj .desc{font-size:13.0px;margin-bottom:6px;line-height:1.40}
-  .pt{font-size:13.0px;margin-bottom:5px;line-height:1.40}
+  .proj h3{font-size:15.6px;margin-bottom:5px;line-height:1.35}
+  .proj .desc{font-size:15.6px;margin-bottom:6px;line-height:1.36}
+  .pt{font-size:15.6px;margin-bottom:5px;line-height:1.36}
   .plain .pt{margin-bottom:3px}
 
   /* 证书压缩 */
   .certs-block .certs{gap:6px}
-  .certs-block .cert{font-size:12.2px;padding:3px 10px}
-  .foot{margin-top:6px;padding-top:8px;font-size:11.7px}
+  .certs-block .cert{font-size:14.6px;padding:3px 10px}
+  .foot{margin-top:6px;padding-top:8px;font-size:14.0px}
 
   /* 两页均衡：蚂蚁及之后的经历整体到第2页 */
   .job,.proj{break-inside:avoid}
@@ -237,7 +237,7 @@ body{background:var(--paper);color:var(--ink);font-family:var(--sans);
       <div class="pt"><b>合规三层闭环：</b>提示词编排 + 数据管控平台 + 数据申请链路；员工个人信息零开放、按组织架构分级授权；权限全生命周期管理（离职失效、调岗撤销）。</div>
     </div>
 
-    <div class="proj">
+    <div class="proj page-two-start">
       <h3>IT 审计管理工具（产品与数据架构设计者）</h3>
       <div class="pt">主导产品与数据架构设计，基于低代码平台（字节 Apass）实现：传统抽样审计 → <b>增量全量异常巡查</b>（系统变更合规、离职账号、异常登录等）——审计覆盖率从抽样提升到全量；具体开发实施由团队协作落地。</div>
       <div class="pt">将「风险 → 控制 → 测试」审计方法论转化为严密的数据结构设计，审计工作有记录、可复制、可溯源、支持范围和时间维度完整性校验。</div>
@@ -245,7 +245,7 @@ body{background:var(--paper);color:var(--ink);font-family:var(--sans);
     </div>
   </div>
 
-  <div class="job page-two-start">
+  <div class="job">
     <div class="job-head">
       <span class="co">蚂蚁区块链科技（上海）</span>
       <span class="role">数据中台产品经理及运营</span>
