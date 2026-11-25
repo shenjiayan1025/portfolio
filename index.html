@@ -242,7 +242,7 @@ html,body{height:100%;overflow:hidden;background:#071d14;font-family:var(--sans)
 
     <div class="laptop">
       <div class="screen" id="screen">
-        <img id="screenImg" src="pdfpages/p01.png" alt="作品展示">
+        <img id="screenImg" src="pdfpages_webp/p01.webp" alt="作品展示">
         <div class="pdf-hot left" id="hotPrev" title="上一页"></div>
         <div class="pdf-hot right" id="hotNext" title="下一页"></div>
       </div>
@@ -516,9 +516,9 @@ function fillCase(){
 }
 /* 预加载 32 页到浏览器缓存：翻页不再等网络下载，瞬间切换 */
 const pdfCache=[];
-for(let i=1;i<=32;i++){const im=new Image();im.src='pdfpages/p'+String(i).padStart(2,'0')+'.png';pdfCache.push(im)}
+for(let i=1;i<=32;i++){const im=new Image();im.src='pdfpages_webp/p'+String(i).padStart(2,'0')+'.webp';pdfCache.push(im)}
 function renderPdf(){
-  screenImg.src='pdfpages/p'+String(pdfPage).padStart(2,'0')+'.png';
+  screenImg.src='pdfpages_webp/p'+String(pdfPage).padStart(2,'0')+'.webp';
   document.getElementById('pdfPage').textContent=String(pdfPage).padStart(2,'0')+' / 32';
 }
 /* ---------- 过场视频：变速播放（brief 慢-快-慢曲线） ---------- */
