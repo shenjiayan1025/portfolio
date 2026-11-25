@@ -111,13 +111,62 @@ body{background:var(--paper);color:var(--ink);font-family:var(--sans);
   .proj{padding:14px}
 }
 
-/* ============ 打印 ============ */
+/* ============ 打印（紧凑两页版，仅打印时生效） ============ */
+@page{size:A4;margin:12mm 13mm}
 @media print{
-  body{background:#fff;font-size:11px}
+  html,body{background:#fff}
+  body{font-size:10px;line-height:1.52;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .tools{display:none}
   .page{max-width:none;padding:0}
-  .portrait{width:96px;height:96px}
+
+  /* 头部压缩 */
+  .head{padding-bottom:16px}
+  .head-grid{grid-template-columns:170px 1fr;gap:22px}
+  .portrait{width:72px;height:72px;border-width:1px;box-shadow:none}
+  .side-col h1{font-size:19px;margin-top:8px}
+  .contact{margin-top:7px;font-size:9.4px;line-height:1.6}
+  .intro{padding:12px 15px}
+  .intro-h{margin-bottom:8px}
+  .intro-h h2{font-size:14px}
+  .intro p{font-size:9.6px;margin-bottom:6px;line-height:1.5}
+  .intro strong{font-weight:600}
+  .keys{margin-top:8px;gap:5px}
+  .key{font-size:9px;padding:2px 9px}
+
+  /* 板块标题压缩 */
+  .sec-title{margin:20px 0 15px}
+  .sec-title.sep{border-top:1px solid var(--line);padding-top:16px;margin-top:20px}
+  .sec-title h2{font-size:14px}
+  .sec-title .en{font-size:9px;margin-left:8px}
+
+  /* 教育压缩 */
+  .edu-line{margin-bottom:5px;font-size:9.8px;line-height:1.5}
+  .edu-date{font-size:9px}
+
+  /* 工作经历压缩 */
+  .job{padding-left:15px;margin-bottom:18px}
+  .job::before{top:12px;bottom:4px}
+  .job::after{top:6px;width:5px;height:5px}
+  .job-head{gap:4px 10px}
+  .job-head .co{font-size:13px}
+  .job-head .role{font-size:10px}
+  .job-head .date{font-size:9px}
+  .proj{margin-top:10px;padding:10px 12px;border-radius:5px;box-shadow:none}
+  .proj h3{font-size:10px;margin-bottom:5px;line-height:1.35}
+  .proj .desc{font-size:10px;margin-bottom:6px;line-height:1.5}
+  .pt{font-size:10px;margin-bottom:5px;line-height:1.5}
+  .plain .pt{margin-bottom:3px}
+
+  /* 证书压缩 */
+  .certs-block .certs{gap:6px}
+  .certs-block .cert{font-size:9.4px;padding:3px 10px}
+  .foot{margin-top:6px;padding-top:8px;font-size:9px}
+
+  /* 两页均衡：蚂蚁及之后的经历整体到第2页 */
   .job,.proj{break-inside:avoid}
+  .page-two-start{break-before:page;page-break-before:always}
+  .pt,li{break-inside:avoid}
+  .sec-title{break-after:avoid}
 }
 </style></head>
 <body>
@@ -196,7 +245,7 @@ body{background:var(--paper);color:var(--ink);font-family:var(--sans);
     </div>
   </div>
 
-  <div class="job">
+  <div class="job page-two-start">
     <div class="job-head">
       <span class="co">蚂蚁区块链科技（上海）</span>
       <span class="role">数据中台产品经理及运营</span>
