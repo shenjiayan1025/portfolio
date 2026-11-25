@@ -611,8 +611,52 @@ document.getElementById('prevBtn').onclick=()=>swap((ci+1)%2);
 function pdfGo(d){if(ci!==0)return;const n=pdfPage+d;if(n>=1&&n<=32){pdfPage=n;renderPdf()}}
 document.getElementById('pdfPrev').onclick=()=>pdfGo(-1);
 document.getElementById('pdfNext').onclick=()=>pdfGo(1);
-document.getElementById('hotPrev').onclick=()=>pdfGo(-1);
-document.getElementById('hotNext').onclick=()=>pdfGo(1);
+
+/* ---------- 鼠标拖拽滑动翻页：按住 PPT 左右拖，图片跟手，松手翻页带滑动动画 ---------- */
+let dragX0=null, dragMoved=false, dragSuppressClick=false;
+const dragScreen=document.getElementById('screen');
+dragScreen.addEventListener('pointerdown',e=>{
+  if(!caseEl.classList.contains('on')||ci!==0||e.pointerType==='touch'||e.button!==0)return;
+  dragX0=e.clientX; dragMoved=false;
+  try{dragScreen.setPointerCapture(e.pointerId)}catch(_){}
+});
+dragScreen.addEventListener('pointermove',e=>{
+  if(dragX0===null)return;
+  const dx=e.clientX-dragX0;
+  if(Math.abs(dx)>6)dragMoved=true;
+  if(dragMoved){
+    const d=Math.max(-72,Math.min(72,dx*0.62));
+    screenImg.style.transition='none';
+    screenImg.style.transform='translateX('+d+'px)';
+  }
+});
+function dragEnd(e){
+  if(dragX0===null)return;
+  const dx=e.clientX-dragX0; dragX0=null;
+  if(dragMoved){dragSuppressClick=true;setTimeout(()=>{dragSuppressClick=false},70)}
+  const target=pdfPage+(dx<0?1:-1);
+  const flip=dragMoved&&Math.abs(dx)>50&&target>=1&&target<=32;
+  if(flip){
+    const dir=dx<0?-1:1;
+    screenImg.style.transition='transform .3s cubic-bezier(.22,.61,.36,1)';
+    screenImg.style.transform='translateX('+(dir*72)+'px)';
+    setTimeout(()=>{
+      pdfPage=target; renderPdf();
+      screenImg.style.transition='none';
+      screenImg.style.transform='translateX('+(-dir*72)+'px)';
+      void screenImg.offsetWidth;
+      screenImg.style.transition='transform .3s cubic-bezier(.22,.61,.36,1)';
+      screenImg.style.transform='translateX(0)';
+    },170);
+  }else{
+    screenImg.style.transition='transform .26s ease-out';
+    screenImg.style.transform='translateX(0)';
+  }
+}
+dragScreen.addEventListener('pointerup',dragEnd);
+dragScreen.addEventListener('pointercancel',dragEnd);
+document.getElementById('hotPrev').onclick=()=>{if(!dragSuppressClick)pdfGo(-1)};
+document.getElementById('hotNext').onclick=()=>{if(!dragSuppressClick)pdfGo(1)};
 
 /* ---------- 滚轮 / 滑动 / 键盘 ---------- */
 let lock=0;
