@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>沈佳燕 · 从数据治理到 AI 问数</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+/* 内嵌 Inter Tight 900：访客无需本机装字体即可看到原 brief 字形 */
+@font-face{font-family:'Inter Tight';src:url('inter-tight-900.woff2') format('woff2'),url('inter-tight-900.woff') format('woff');font-weight:900;font-style:normal;font-display:swap}
+:root{
+  --green-900:#0b2f20;--green-700:#1a5a40;--mint:#cfeee0;
+  --ink:#0d0f0e;--paper:#faf9f6;--acc:#2e6ea6;
+  --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;
+  --serif:'Songti SC','STSong','Source Han Serif SC',serif;
+}
+html,body{height:100%;overflow:hidden;background:#071d14;font-family:var(--sans);
+  -webkit-font-smoothing:antialiased}
+#vp{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+/* flex:none + min-width：舞台是 #vp 的 flex 子项，面板比 1440 窄时默认会被"压瘦"，
+   导致按左边缘定位的屏幕层/按钮错位；这里锁死 1440×810，只允许整体等比缩放 */
+#stage{position:relative;flex:0 0 auto;min-width:1440px;width:1440px;height:810px;transform-origin:50% 50%;overflow:hidden;
+  background:#fff}
+
+/* ============ HERO ============ */
+/* 首页底图独立成层：它就是过场视频的第 0 帧，视频一出来画面不变（brief §9 的无缝交接） */
+#heroBg{position:absolute;inset:0;z-index:1;background:url('hero-photo.jpg') center center/cover no-repeat}
+/* #hero 本身透明，只装前景（压暗层/大字/人物/入口/工牌），层级在视频之上 */
+#hero{position:absolute;inset:0;z-index:16;transition:opacity .6s,transform .9s cubic-bezier(.65,0,.35,1)}
+/* 退场：前景不淡出，直接“飞走”（brief §9 heroOut）——大字上抬、工牌上收、WHY ME 左滑、压暗层左移，
+   全程不透明；返回时沿原路滑回 */
+#hero .wordmark,#hero .badge-scale,#hero .hero-vign{transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+#hero.leaving{pointer-events:none}
+#hero.leaving .wordmark{transform:translateY(-330px);transition:transform .38s cubic-bezier(.5,0,.75,0)}
+#hero.leaving .why-me{transform:translateX(-130%);transition:transform .38s cubic-bezier(.5,0,.75,0)}
+#hero.leaving .badge-scale{transform:translateY(-110%);transition:transform .38s cubic-bezier(.5,0,.75,0)}
+#hero.leaving .hero-vign{transform:translateX(-100%);transition:transform .42s cubic-bezier(.5,0,.75,0)}
+/* 静态人物层必须让位给视频里动起来的人物：第一帧与它完全重合，直接隐藏看不出跳变 */
+#hero.leaving .hero-person{visibility:hidden}
+/* 飞完之后瞬间整体收起（不做淡出）；返回首页时前景再用 .6s 淡入 */
+#hero.gone{opacity:0;pointer-events:none;transition:none}
+/* 顶部渐变大字（brief §5.1）：白色→脚部融进绿色，压在画面上、工牌与菜单之下
+   逐字符 3D 折叠入场（原生复刻 React Bits FoldText：paper / hinge=top / char） */
+.wordmark{position:absolute;left:0;top:0;width:1440px;height:260px;overflow:visible;z-index:3;pointer-events:none}
+.fold-line{position:absolute;left:0;top:0;width:1440px;height:260px}
+.fold-seg{position:absolute;top:0;height:260px;perspective:700px;display:inline-block;line-height:1}
+.fold-piece{position:relative;display:inline-block;transform-origin:50% 0%;transform-style:preserve-3d;
+  font-family:'Inter Tight','Arial Black','PingFang SC',sans-serif;font-weight:900;font-size:268px;line-height:1;
+  will-change:transform}
+.fold-face{display:inline-block;
+  background:linear-gradient(180deg,#ffffff 0%,#f1f5f3 50%,rgba(215,230,222,.28) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.fold-crease{position:absolute;left:0;top:0;display:inline-block;pointer-events:none;opacity:0;
+  background:linear-gradient(180deg,rgba(0,0,0,.58) 0%,rgba(0,0,0,.22) 42%,rgba(255,255,255,.26) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+/* 人物抠图层：与首图同尺寸铺底，压在大字之上，让人物挡住字 */
+.hero-person{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:4;pointer-events:none}
+/* 左侧压暗一层，保证白字可读；右侧保留原图绿棚 */
+.hero-vign{position:absolute;inset:0;background:linear-gradient(90deg,rgba(6,30,20,.62) 0%,rgba(6,30,20,.34) 26%,rgba(6,30,20,.06) 52%,transparent 70%)}
+/* 原抠图序列帧已由整张首图替代 */
+.person{display:none}
+/* 左侧旧文案暂隐藏：让首图完整露出 */
+.hero-copy,.hero-actions,.hero-hint{display:none!important}
+/* 左侧 WHY ME 作品入口：马赛克方块字 + 鼠标经过颗粒碎片（离开自动复原） */
+.why-me{position:absolute;left:72px;top:38%;z-index:14;pointer-events:auto;cursor:pointer;color:#fff;
+  display:block;padding:10px 18px 14px 0;perspective:820px;transition:transform .3s ease}
+/* 必须是 block：行内元素的上下外边距不生效，会让标签和点阵字贴死（点阵字悬浮上移 8px 时会压进来） */
+.why-me .wm-kicker{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.24em;color:rgba(255,255,255,.82);
+  margin-bottom:22px;line-height:1}
+/* 方块字舞台：轻微悬浮，hover 时摆正并抬升 */
+.wm-3d{display:block;width:max-content;transform:rotateY(-2deg);
+  animation:wmFloat 4.2s ease-in-out infinite;transition:transform .45s cubic-bezier(.2,.8,.2,1)}
+.why-me:hover .wm-3d{transform:translateY(-3px) rotateY(0)}
+.wm-mosaic{display:block;width:350px;height:75px;overflow:visible;
+  filter:drop-shadow(0 6px 16px rgba(3,20,12,.5))}
+.wm-mosaic rect{transform-box:fill-box;transform-origin:center;will-change:transform,opacity}
+.wm-chips rect{opacity:0}
+.why-me .wm-sub{display:flex;align-items:center;gap:12px;margin-top:12px;
+  font-size:13px;letter-spacing:.12em;color:rgba(255,255,255,.95)}
+.why-me .wm-dot{width:9px;height:9px;border-radius:50%;background:#fff;flex:0 0 auto;
+  animation:wmPulse 2s ease-out infinite}
+.why-me .wm-arrow{font-size:19px;line-height:1;display:inline-block;
+  animation:wmNudge 1.5s ease-in-out infinite}
+.why-me:hover .wm-arrow{animation:none;transform:translateX(10px);transition:transform .25s}
+@keyframes wmFloat{0%,100%{transform:translateY(0) rotateY(-2deg)}
+  50%{transform:translateY(-8px) rotateY(3deg)}}
+@keyframes wmPulse{0%{box-shadow:0 0 0 0 rgba(255,255,255,.55)}
+  70%{box-shadow:0 0 0 12px rgba(255,255,255,0)}100%{box-shadow:0 0 0 0 rgba(255,255,255,0)}}
+@keyframes wmNudge{0%,100%{transform:translateX(0)}50%{transform:translateX(7px)}}
+@media(prefers-reduced-motion:reduce){
+  .wm-3d,.why-me .wm-dot,.why-me .wm-arrow{animation:none}
+}
+/* 工牌：brief 原始 PNG（白色挂绳 + 银色弹簧夹 + 透明卡套），右上角掉落 */
+.badge-scale{position:absolute;left:986px;top:-235px;width:582px;height:1030px;
+  transform-origin:288px 0;pointer-events:none;z-index:12}
+.badge{position:absolute;inset:0;transform-origin:288px 0;will-change:transform,opacity;
+  filter:drop-shadow(0 20px 26px rgba(20,40,30,.22))}
+.badge .badge-img{position:absolute;inset:0;width:582px;height:1030px;display:block}
+/* 信息卡：brief §5.3 精确坐标 left172 top536 238×392，叠在原图白卡上 */
+.card{position:absolute;left:172px;top:536px;width:238px;height:392px;padding:20px 16px 0;
+  color:#141615;font-family:var(--sans)}
+.card h4{font-size:30px;line-height:.95;font-weight:800;letter-spacing:-.5px}
+.card .yr{position:absolute;right:16px;top:62px;font-family:var(--mono);font-size:11px;font-weight:700}
+.card .role{margin-top:12px;padding-top:5px;border-top:1px solid #222;font-size:9.5px;
+  font-weight:700;letter-spacing:.2px;white-space:nowrap}
+.card .ph{width:92px;height:112px;margin:12px auto;border-radius:6px;overflow:hidden;
+  background:#dfe4e1;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
+.card .ph img{width:100%;height:100%;object-fit:cover;object-position:50% 22%;display:block}
+.card .rows{margin-top:4px}
+.card .row{display:flex;justify-content:space-between;align-items:flex-end;font-size:9px;font-weight:700;
+  padding:6px 0 3px;border-bottom:1.5px dotted #333}
+.card .row span{color:#555}
+.card .row b{font-weight:600;text-align:right}
+.card .sig{position:absolute;left:16px;bottom:12px;font-family:var(--mono);font-size:7.5px;
+  letter-spacing:.14em;color:#9aa09a}
+/* 悬停热区：brief §5.3 left160 top470 262×440 */
+.hit{position:absolute;left:160px;top:470px;width:262px;height:440px;
+  pointer-events:auto;cursor:pointer}
+.hint{position:absolute;top:5.5%;left:0;right:0;text-align:center;font-family:var(--mono);
+  font-size:13px;letter-spacing:.18em;color:rgba(255,255,255,.95);
+  text-shadow:0 1px 8px rgba(0,0,0,.55);z-index:12;pointer-events:none}
+.hint b{color:#fff;font-weight:600}
+.hero-hint .arrow{width:26px;height:1px;background:rgba(255,255,255,.6);position:relative}
+.hero-hint .arrow:after{content:'';position:absolute;right:0;top:-3px;width:7px;height:7px;
+  border-right:1px solid rgba(255,255,255,.6);border-bottom:1px solid rgba(255,255,255,.6);transform:rotate(-45deg)}
+.hero-actions{position:absolute;left:92px;top:366px;z-index:9;display:flex;gap:12px}
+.btn{pointer-events:auto;cursor:pointer;border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.08);
+  color:#fff;padding:11px 22px;font-size:14px;letter-spacing:.02em;transition:.2s;border-radius:2px}
+.btn:hover{background:rgba(255,255,255,.2);border-color:#fff}
+.btn.primary{background:var(--mint);color:#0c3523;border-color:var(--mint);font-weight:600}
+.btn.primary:hover{background:#fff;border-color:#fff}
+
+/* ============ TRANSITION 过场 ============ */
+#trans{position:absolute;inset:0;width:1440px;height:810px;object-fit:cover;
+  z-index:15;opacity:0;pointer-events:none}
+#trans.on{opacity:1}
+/* ============ CASE / 作品 ============ */
+#case{position:absolute;inset:0;z-index:20;opacity:0;pointer-events:none;
+  display:flex;align-items:center;justify-content:center;flex-direction:column}
+#case.on{opacity:1;pointer-events:auto}
+.case-bg{position:absolute;inset:0;background:url('case-clean.jpg') center center/cover no-repeat}
+.case-head{display:none!important;position:relative;z-index:2;text-align:center;margin-bottom:16px}
+.case-head h2{font-family:var(--serif);font-size:30px;font-weight:700;color:var(--ink)}
+.case-head .en{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:#6b7075;margin-top:6px}
+/* 作品容器：背景图已含绿底笔记本，屏幕叠层对齐视频末帧的屏幕区域 */
+.laptop{position:absolute;inset:0;z-index:2;width:1440px;height:810px;background:none}
+/* 播放容器：对齐视频末帧笔记本屏幕（x253~1184 / y131~655），作品完整铺满 */
+.screen{position:absolute;left:253px;top:131px;width:932px;height:525px;
+  background:#fff;overflow:hidden;border-radius:0}
+.screen img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#fff}
+/* 案例 UI（白底用深色） */
+.case-ui{position:absolute;inset:0;z-index:5;pointer-events:none}
+.case-ui .back{position:absolute;left:34px;top:30px;pointer-events:auto;cursor:pointer;color:#fff;
+  font-size:14px;border:none;padding:9px 16px;border-radius:2px;background:transparent;transition:.2s}
+.case-ui .back:hover{background:rgba(255,255,255,.14)}
+.ticket{display:none!important;position:absolute;right:34px;top:28px;width:330px;background:#fff;border-radius:3px;padding:20px 24px 16px 30px;
+  box-shadow:0 14px 34px rgba(0,0,0,.15)}
+.ticket h3{font-family:var(--sans);font-size:26px;font-weight:800;color:var(--ink);line-height:1.1;letter-spacing:-.01em}
+.ticket .row{font-family:var(--mono);font-size:11px;color:#5b6165;padding:6px 0 4px;border-bottom:1.5px dotted #333;text-align:right}
+.ticket .desc{margin-top:12px;font-size:12.5px;color:#5b6165;line-height:1.5}
+.pager{display:none!important;position:absolute;left:0;right:0;bottom:22px;justify-content:center;align-items:center;gap:24px;pointer-events:auto}
+.pager button{cursor:pointer;width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(20,20,20,.7);
+  background:transparent;color:var(--ink);font-size:20px;transition:.2s}
+.pager button:hover{background:rgba(0,0,0,.08)}
+.pager .num{font-family:var(--mono);font-size:13px;color:rgba(20,20,20,.75);letter-spacing:.12em}
+/* PDF 翻页控件 */
+.pdfbar{position:absolute;left:50%;bottom:2px;transform:translateX(-50%);z-index:6;pointer-events:auto;
+  display:flex;align-items:center;gap:14px;background:rgba(0,0,0,.4);padding:8px 16px;border-radius:20px;color:#fff;font-size:12px}
+.pdfbar button{cursor:pointer;background:rgba(255,255,255,.15);border:none;color:#fff;width:26px;height:26px;border-radius:50%;font-size:14px}
+.pdfbar button:hover{background:rgba(255,255,255,.3)}
+.pdfbar .p{font-family:var(--mono);letter-spacing:.08em}
+.hidden{display:none!important}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div id="vp"><div id="stage">
+
+  <!-- 首页底图（= 过场视频第 0 帧），全程留在视频下面兜底 -->
+  <div id="heroBg"></div>
+  <!-- HERO -->
+  <div id="hero">
+    <div class="hero-vign"></div>
+    <!-- 顶部渐变大字：brief §5.1 白色→脚部融绿，逐字折叠入场（FoldText 复刻） -->
+    <div class="wordmark" aria-hidden="true"><div class="fold-line" id="foldLine"></div></div>
+    <!-- 人物抠图叠在大字之上，挡住字（brief: 头挡住字母） -->
+    <img class="hero-person" src="hero-person.png" alt="">
+    <div class="person" id="person"></div>
+
+    <!-- 左侧 WHY ME 作品入口：显眼大字 + 动态引导点击 -->
+    <div class="why-me" id="workCta" title="点击进入作品">
+      <span class="wm-kicker">PORTFOLIO / 2026</span>
+      <span class="wm-3d" id="wmMosaic" role="img" aria-label="WHY ME"></span>
+      <span class="wm-sub"><span class="wm-dot"></span>点击进入作品<span class="wm-arrow">→</span></span>
+    </div>
+
+    <div class="badge-scale" id="badgeScale" title="点击查看简历">
+      <div class="badge" id="badge">
+        <img class="badge-img" src="badge-lanyard.webp" alt="">
+        <div class="card">
+          <h4>PROFILE<br>CARD</h4>
+          <div class="yr">2026</div>
+          <div class="role">DATA GOVERNANCE // AI AGENT</div>
+          <div class="ph"><img src="avatar.jpg" alt="沈佳燕"></div>
+          <div class="rows">
+            <div class="row"><span>NAME</span><b>SHEN JIAYAN</b></div>
+            <div class="row"><span>FOCUS</span><b>DATA → AI AGENT</b></div>
+            <div class="row"><span>CERTS</span><b>CDGA / CISA / FRM</b></div>
+            <div class="row"><span>EXP</span><b>7 YEARS IN DATA</b></div>
+          </div>
+          <div class="sig">CLICK TO OPEN RESUME</div>
+        </div>
+        <div class="hit" id="hit"></div>
+      </div>
+    </div>
+
+    <div class="hero-copy">
+      <div class="kicker">PORTFOLIO · 作品集</div>
+      <h1>从数据治理<br>到 <em>AI 问数</em></h1>
+      <div class="who">7 年数据领域经验 · <b>治理为底座，问数为应用</b></div>
+      <div class="tag">主导公司首个 AI 问数智能体从 0 到 1</div>
+    </div>
+
+    <div class="hero-actions">
+      <button class="btn primary" id="enterBtn">进入作品 →</button>
+      <button class="btn" id="resumeBtn">查看简历</button>
+    </div>
+    <div class="hero-hint"><span class="arrow"></span>向下滚动，镜头推进</div>
+  </div>
+
+  <!-- TRANSITION 过场视频 -->
+  <video id="trans" src="transition-new.mp4" muted playsinline preload="auto"></video>
+
+  <!-- CASE -->
+  <div id="case">
+    <div class="case-bg"></div>
+    <div class="case-head"><h2>作品集</h2><div class="en">SELECTED WORK</div></div>
+
+    <div class="laptop">
+      <div class="screen" id="screen">
+        <img id="screenImg" src="pdfpages/p01.png" alt="作品展示">
+      </div>
+    </div>
+
+    <div class="pdfbar hidden" id="pdfbar">
+      <button id="pdfPrev">‹</button>
+      <span class="p" id="pdfPage">01 / 32</span>
+      <button id="pdfNext">›</button>
+    </div>
+
+    <div class="case-ui">
+      <div class="back" id="backBtn">← 返回首页</div>
+      <div class="ticket">
+        <h3 id="ticketTitle">VELL LOOKBOOK</h3>
+        <div class="row" id="ticketRow1">STUDIO VELL / E-COMMERCE</div>
+        <div class="row" id="ticketRow2">数据治理 · 方法论</div>
+        <div class="row" id="ticketRow3">2026 / 32 PAGES</div>
+        <div class="desc" id="ticketDesc">— 从数据质量问题到字段级索引，一套可落地的完整链路。</div>
+      </div>
+      <div class="pager">
+        <button id="prevBtn" title="上一个作品">‹</button>
+        <span class="num" id="caseNum">01 / 02</span>
+        <button id="nextBtn" title="下一个作品">›</button>
+      </div>
+    </div>
+  </div>
+
+</div></div>
+
+<script>
+/* ---------- 舞台缩放 ---------- */
+const stage=document.getElementById('stage');
+function fit(){
+  const s=Math.min(innerWidth/1440,innerHeight/810);
+  stage.style.transform='scale('+s+')';
+}
+addEventListener('resize',fit); fit();
+
+/* ---------- 左侧 WHY ME：5×7 点阵马赛克字 + 鼠标颗粒碎片（自动复原） ---------- */
+(function(){
+  const host=document.getElementById('wmMosaic');
+  if(!host) return;
+  const NS='http://www.w3.org/2000/svg';
+  const GLYPH={
+    W:['10001','10001','10001','10101','10101','11011','10001'],
+    H:['10001','10001','10001','11111','10001','10001','10001'],
+    Y:['10001','10001','01010','00100','00100','00100','00100'],
+    M:['10001','11011','10101','10101','10001','10001','10001'],
+    E:['11111','10000','10000','11110','10000','10000','11111']
+  };
+  const TEXT='WHY ME', PITCH=11, CELL=9, ROWS=7, RADIUS=127;
+  const cols=[];
+  Array.from(TEXT).forEach(ch=>{
+    if(ch===' '){cols.push('0000000','0000000','0000000');return}
+    if(GLYPH[ch]){
+      const rows=GLYPH[ch];
+      for(let c=0;c<5;c++) cols.push(rows.map(row=>row[c]).join(''));
+      cols.push('0000000');
+    }
+  });
+  while(cols.length && /^0+$/.test(cols[cols.length-1])) cols.pop();
+  const W=cols.length*PITCH-2, H=ROWS*PITCH-2;
+
+  const svg=document.createElementNS(NS,'svg');
+  svg.setAttribute('class','wm-mosaic');
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  svg.setAttribute('aria-hidden','true');
+  const cellGroup=document.createElementNS(NS,'g');
+  const chipGroup=document.createElementNS(NS,'g');chipGroup.setAttribute('class','wm-chips');
+
+  const items=[];
+  for(let c=0;c<cols.length;c++)for(let r=0;r<ROWS;r++){
+    if(cols[c][r]!=='1') continue;
+    const rect=document.createElementNS(NS,'rect');
+    rect.setAttribute('x',c*PITCH);rect.setAttribute('y',r*PITCH);
+    rect.setAttribute('width',CELL);rect.setAttribute('height',CELL);
+    rect.setAttribute('fill','#ffffff');
+    rect.setAttribute('opacity','1');
+    cellGroup.appendChild(rect);
+    const a=(c*13+r*29)%360*Math.PI/180;
+    items.push({el:rect,cx:c*PITCH+CELL/2,cy:r*PITCH+CELL/2,
+      ux:Math.cos(a),uy:Math.sin(a),spin:((c*7+r*11)%5-2)*14,
+      s:0,aim:0,base:1,dist:29});
+  }
+
+  let seed=12345;const rnd=()=>((seed=(seed*1664525+1013904223)>>>0)/4294967296);
+  for(let i=0;i<38;i++){
+    const rect=document.createElementNS(NS,'rect');
+    const size=3+rnd()*3;
+    const x=rnd()*W, y=rnd()*H;
+    rect.setAttribute('x',x);rect.setAttribute('y',y);
+    rect.setAttribute('width',size);rect.setAttribute('height',size);
+    rect.setAttribute('fill','#f6faf8');rect.setAttribute('opacity','0');
+    chipGroup.appendChild(rect);
+    const a=rnd()*Math.PI*2;
+    items.push({el:rect,cx:x+size/2,cy:y+size/2,ux:Math.cos(a),uy:Math.sin(a),
+      spin:(rnd()*2-1)*90,s:0,aim:0,base:1,dist:51});
+  }
+  svg.appendChild(cellGroup);svg.appendChild(chipGroup);host.appendChild(svg);
+
+  const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if(reduce) return;
+  // 整个 WHY ME 区域（含标签与引导文字）都能触发；坐标夹到字区内，避免偏一点就失效
+  const zone=document.querySelector('.why-me')||host;
+  const scatter=e=>{
+    const box=svg.getBoundingClientRect();
+    const px=Math.max(0,Math.min(W,(e.clientX-box.left)*(W/box.width)));
+    const py=Math.max(0,Math.min(H,(e.clientY-box.top)*(H/box.height)));
+    items.forEach(it=>{
+      const d=Math.hypot(px-it.cx,py-it.cy)/RADIUS;
+      it.aim=d<1?Math.pow(1-d,1.25):0;
+    });
+  };
+  zone.addEventListener('pointerenter',scatter,{passive:true});
+  zone.addEventListener('pointermove',scatter,{passive:true});
+  zone.addEventListener('pointerleave',()=>{items.forEach(it=>{it.aim=0})});
+
+  let last=performance.now();
+  (function tick(now){
+    const dt=Math.min(now-last,50);last=now;
+    items.forEach(it=>{
+      if(Math.abs(it.aim-it.s)>0.001){
+        const rate=it.aim>it.s?18:7;
+        it.s+=(it.aim-it.s)*(1-Math.exp(-rate*dt/16.67));
+        if(Math.abs(it.aim-it.s)<0.002) it.s=it.aim;
+        const off=it.s*it.dist;
+        it.el.style.transform=`translate(${(it.ux*off).toFixed(2)}px,${(it.uy*off).toFixed(2)}px) rotate(${(it.s*it.spin).toFixed(2)}deg)`;
+        it.el.setAttribute('opacity',(it.base*(1-it.s*0.45)).toFixed(3));
+      }
+    });
+    requestAnimationFrame(tick);
+  })(last);
+})();
+
+/* ---------- 顶部大字逐字折叠入场（复刻 React Bits FoldText, paper/hinge=top/char） ---------- */
+const RM=matchMedia('(prefers-reduced-motion:reduce)').matches;
+(function(){
+  const line=document.getElementById('foldLine');
+  const TEXT='HELLO AGENT', ANGLE=92, DUR=.65, STAG=.045, CREASE=.55, RADIUS=140, REFOLD=45;
+  const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+  const ease=t=>1-Math.pow(1-t,3); // power3.out 近似
+  const items=[];
+  Array.from(TEXT).forEach((ch,i)=>{
+    const seg=document.createElement('span'); seg.className='fold-seg';
+    const piece=document.createElement('span'); piece.className='fold-piece';
+    const face=document.createElement('span'); face.className='fold-face';
+    const crease=document.createElement('span'); crease.className='fold-crease';
+    const glyph=ch===' '?'\u00A0':ch;
+    face.textContent=glyph; crease.textContent=glyph;
+    piece.appendChild(face); piece.appendChild(crease);
+    seg.appendChild(piece); line.appendChild(seg);
+    items.push({seg,piece,face,crease,i,aim:0,r:0,centerX:0,t:RM?1:0,scale:1});
+  });
+  // 按 Inter Tight 实际字宽排布：量自然宽度再等比铺满 1412px（原 textLength）
+  // 用 offsetWidth（不受 transform 影响），避免 resize 时量到已折叠的宽度
+  function layout(){
+    const widths=items.map(it=>it.face.offsetWidth);
+    const natural=widths.reduce((a,b)=>a+b,0);
+    const sx=natural>0?1412/natural:1;
+    let x=14;
+    items.forEach((it,k)=>{
+      // scaleX 以字符中心为原点：补偿左移量，让缩放后的字正好从 x 开始
+      const w=widths[k], shift=w*(1-sx)/2;
+      it.seg.style.left=(x-shift)+'px'; it.scale=sx;
+      it.centerX=x+w*sx/2;
+      x+=w*sx;
+    });
+  }
+  layout(); addEventListener('resize',layout);
+  function render(it){
+    const prog=ease(clamp(it.t,0,1));
+    const deg=-((1-prog)*ANGLE+it.r*REFOLD);
+    it.piece.style.transform='scaleX('+it.scale+') rotateX('+deg+'deg)';
+    it.face.style.opacity=String(clamp(prog,0,1));
+    it.crease.style.opacity=String(CREASE*clamp((1-prog)+it.r*0.4,0,1));
+  }
+  items.forEach(render);
+  if(!RM){
+    const t0=performance.now();
+    addEventListener('pointermove',e=>{
+      const box=document.getElementById('stage').getBoundingClientRect();
+      const sc=1440/box.width, px=(e.clientX-box.left)*sc, py=e.clientY-box.top;
+      items.forEach(it=>{const d=Math.hypot(px-it.centerX,py-120)/RADIUS;it.aim=d<1?1-d*d*(3-2*d):0});
+    },{passive:true});
+    (function loop(){
+      const now=performance.now();
+      items.forEach((it,k)=>{
+        it.t=clamp((now-t0-k*STAG*1000)/(DUR*1000),0,1);
+        const rate=it.aim>it.r?14:6;
+        it.r+=(it.aim-it.r)*(1-Math.exp(-rate/60));
+        if(Math.abs(it.aim-it.r)<=.002) it.r=it.aim;
+        render(it);
+      });
+      requestAnimationFrame(loop);
+    })();
+  }
+})();
+
+/* ---------- 人物序列帧（无声循环） ---------- */
+const person=document.getElementById('person');
+let fr=1;
+function setFrame(n){person.style.backgroundImage="url('cutframes/f"+String(n).padStart(2,'0')+".png')"}
+setFrame(1);
+if(!RM){
+  setInterval(()=>{fr=fr%8+1;setFrame(fr)},500); // 8帧×0.5s=4s 循环，对应原视频4秒
+}
+
+/* ---------- 工牌掉落动画（brief 原时序） ---------- */
+const badge=document.getElementById('badge');
+const hit=document.getElementById('hit');
+let sway=null;
+function dropBadge(){
+  if(sway){sway.cancel();sway=null}
+  badge.getAnimations().forEach(a=>a.cancel());
+  if(RM){badge.style.transform='rotate(0)';return}
+  const a=badge.animate([
+    {transform:'translateY(-120%) rotate(8deg)',opacity:0,offset:0},
+    {opacity:1,offset:.12},
+    {transform:'translateY(0) rotate(-3deg)',offset:.6},
+    {transform:'translateY(0) rotate(1.6deg)',offset:.8},
+    {transform:'translateY(0) rotate(0)',offset:1}
+  ],{duration:1500,delay:700,easing:'cubic-bezier(.2,.8,.2,1)',fill:'both'});
+  a.onfinish=()=>{
+    if(RM)return;
+    sway=badge.animate([{transform:'rotate(-1.1deg)'},{transform:'rotate(1.1deg)'}],
+      {duration:3200,iterations:Infinity,direction:'alternate',easing:'ease-in-out'});
+  };
+}
+dropBadge();
+hit.addEventListener('pointerenter',()=>{
+  if(RM)return;
+  badge.animate([{transform:'rotate(0)',offset:0},{transform:'rotate(-6deg)',offset:.25},
+    {transform:'rotate(4deg)',offset:.5},{transform:'rotate(-2deg)',offset:.75},
+    {transform:'rotate(0)',offset:1}],{duration:1400,easing:'ease-out',composite:'add'});
+});
+hit.addEventListener('click',()=>location.href='resume.html');
+
+/* ---------- 作品数据 ---------- */
+const CASES=[
+  {
+    title:'从数据治理到 AI 问数',
+    row1:'DATA GOVERNANCE / AI', row2:'数据治理 · 方法论', row3:'2026 / 32 PAGES',
+    desc:'— 从数据质量问题到字段级索引，一套可落地的完整链路。',
+    type:'pdf'
+  },
+  {
+    title:'数据安全全景图',
+    row1:'DATA SECURITY / PANORAMA', row2:'数据安全 · 全景视图', row3:'2026 / 1920×1080',
+    desc:'— 把数据安全的分层与防线，画进一张可总览的全景图。',
+    type:'image'
+  }
+];
+let ci=0, pdfPage=1, busy=false, heroTimer=null;
+const hero=document.getElementById('hero'), caseEl=document.getElementById('case');
+const screenImg=document.getElementById('screenImg'), pdfbar=document.getElementById('pdfbar');
+
+function fillCase(){
+  const c=CASES[ci];
+  document.getElementById('ticketTitle').textContent=c.title;
+  document.getElementById('ticketRow1').textContent=c.row1;
+  document.getElementById('ticketRow2').textContent=c.row2;
+  document.getElementById('ticketRow3').textContent=c.row3;
+  document.getElementById('ticketDesc').textContent=c.desc;
+  document.getElementById('caseNum').textContent=String(ci+1).padStart(2,'0')+' / 02';
+  if(c.type==='pdf'){
+    pdfPage=1; renderPdf(); pdfbar.classList.remove('hidden'); screenImg.className='';
+  }else{
+    screenImg.src='works2.jpg'; screenImg.className='wide'; pdfbar.classList.add('hidden');
+  }
+}
+function renderPdf(){
+  screenImg.src='pdfpages/p'+String(pdfPage).padStart(2,'0')+'.png';
+  document.getElementById('pdfPage').textContent=String(pdfPage).padStart(2,'0')+' / 32';
+}
+/* ---------- 过场视频：变速播放（brief 慢-快-慢曲线） ---------- */
+const trans=document.getElementById('trans');
+let rafId=null, transReady=false;
+const markTransReady=()=>{transReady=true};
+trans.addEventListener('loadeddata',markTransReady);
+trans.addEventListener('canplay',markTransReady);
+trans.addEventListener('loadedmetadata',()=>{if(trans.readyState>=2)transReady=true});
+trans.addEventListener('error',()=>{transReady=false});
+function stopTrans(){
+  if(rafId){cancelAnimationFrame(rafId);rafId=null}
+  // 视频直接退出，不做淡出：临时关掉过渡再立刻隐藏
+  trans.style.transition='none';
+  trans.classList.remove('on');
+  void trans.offsetWidth; // 强制重排，确保 none 生效
+  trans.style.transition='';
+  stage.classList.remove('transing');
+  try{trans.pause()}catch(e){}
+}
+function arriveCase(){
+  stopTrans();
+  fillCase();
+  // 作品页硬切：视频最后一帧与作品页画面一致，无需淡入
+  caseEl.classList.add('on');
+  stage.classList.add('caseon');
+  setTimeout(()=>{busy=false},300);
+}
+function playTransition(){
+  // 用户减少动画 → 直接切作品页；视频用 readyState 兜底，事件错过也照常播放
+  if(RM){arriveCase();return}
+  if(!transReady && trans.readyState<2){
+    try{trans.load()}catch(e){}
+  }
+  stage.classList.add('transing');
+  // 视频不带淡入、直接显示第 0 帧（与底图同一画面）；底图继续留在下面，
+  // 万一视频首帧还没解码完，露出来的也是同一张图而不是白屏
+  trans.currentTime=0;
+  trans.classList.add('on');
+  const DUR=5.020833;
+  let last=performance.now();
+  const play=trans.play();
+  if(play&&play.catch)play.catch(()=>{arriveCase();return});
+  function tick(now){
+    const dt=Math.min((now-last)/1000,0.1); last=now;
+    const p=Math.min(trans.currentTime/DUR,1);
+    // brief §9: rate = max(1.2, 1.8 + 2.4*sin(pi*p*1.08))
+    const rate=Math.max(1.2,1.8+2.4*Math.sin(Math.PI*p*1.08));
+    trans.playbackRate=Math.min(rate,8);
+    // 新视频末帧已是绿底作品页：在纯末帧出现前硬切到真实作品页
+    if(trans.ended||trans.currentTime>=4.73){arriveCase();return}
+    rafId=requestAnimationFrame(tick);
+  }
+  rafId=requestAnimationFrame(tick);
+}
+function toCase(){
+  if(busy||caseEl.classList.contains('on'))return;
+  busy=true;
+  // 前景“飞走”与视频起播同时开始：底图与视频第 0 帧是同一画面，人物一动就接上；
+  // 飞完（约 400ms）再把前景整体收起，期间不做淡出
+  hero.classList.add('leaving');
+  clearTimeout(heroTimer);
+  heroTimer=setTimeout(()=>{if(hero.classList.contains('leaving'))hero.classList.add('gone')},420);
+  playTransition();
+}
+function toHero(){
+  if(busy)return; busy=true;
+  clearTimeout(heroTimer);
+  stopTrans();
+  caseEl.classList.remove('on');
+  stage.classList.remove('caseon');
+  hero.classList.remove('leaving');
+  hero.classList.remove('gone');
+  setTimeout(()=>{busy=false},700);
+}
+function swap(next){
+  if(busy)return; busy=true;
+  screenImg.animate([{opacity:1},{opacity:0}],{duration:260,fill:'forwards'});
+  setTimeout(()=>{
+    ci=next; fillCase();
+    screenImg.animate([{opacity:0},{opacity:1}],{duration:400,fill:'forwards'});
+    setTimeout(()=>{busy=false},420);
+  },280);
+}
+document.getElementById('enterBtn').onclick=toCase;
+document.getElementById('workCta').onclick=toCase;
+document.getElementById('backBtn').onclick=toHero;
+document.getElementById('nextBtn').onclick=()=>swap((ci+1)%2);
+document.getElementById('prevBtn').onclick=()=>swap((ci+1)%2);
+document.getElementById('pdfPrev').onclick=()=>{if(pdfPage>1){pdfPage--;renderPdf()}};
+document.getElementById('pdfNext').onclick=()=>{if(pdfPage<32){pdfPage++;renderPdf()}};
+
+/* ---------- 滚轮 / 滑动 / 键盘 ---------- */
+let lock=0;
+addEventListener('wheel',e=>{
+  if(Date.now()-lock<900)return;
+  if(!caseEl.classList.contains('on')){
+    if(e.deltaY>18){lock=Date.now();toCase();e.preventDefault()}
+  }else if(ci===0 && pdfPage<32 && e.deltaY>18){
+    // 作品一内部翻页
+    if(e.target.closest('.pdfbar'))return;
+    pdfPage++;renderPdf();lock=Date.now();e.preventDefault();
+  }
+},{passive:false});
+let ty=0;
+addEventListener('touchstart',e=>{ty=e.touches[0].clientY},{passive:true});
+addEventListener('touchend',e=>{
+  const dy=ty-e.changedTouches[0].clientY;
+  if(Math.abs(dy)<50)return;
+  if(!caseEl.classList.contains('on')&&dy>0){toCase()}
+},{passive:true});
+addEventListener('keydown',e=>{
+  if(e.key==='ArrowDown'||e.key==='PageDown'||e.key===' '){
+    if(!caseEl.classList.contains('on'))toCase();
+    else if(ci===0&&pdfPage<32){pdfPage++;renderPdf()}
+    e.preventDefault();
+  }else if(e.key==='ArrowUp'||e.key==='PageUp'){
+    if(caseEl.classList.contains('on')){
+      if(ci===0&&pdfPage>1){pdfPage--;renderPdf()}else toHero();
+    }
+    e.preventDefault();
+  }else if(e.key==='ArrowRight'&&caseEl.classList.contains('on'))swap((ci+1)%2);
+  else if(e.key==='ArrowLeft'&&caseEl.classList.contains('on'))swap((ci+1)%2);
+  else if(e.key==='Escape'&&caseEl.classList.contains('on'))toHero();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>沈佳燕 · 简历</title>
+<style>
+:root{
+  --paper:#faf9f6; --card:#ffffff; --ink:#1b1d1f; --sub:#5f6469; --dim:#90969c;
+  --acc:#2e6ea6; --acc-soft:#eef4fa; --line:#e4e4e1; --line2:#d3d7da;
+  --sans:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;
+  --serif:'Songti SC','STSong','Source Han Serif SC',serif;
+  --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;line-height:1.75;font-size:14px}
+
+/* 顶部工具条 */
+.tools{position:fixed;top:0;left:0;right:0;height:44px;z-index:50;display:flex;
+  align-items:center;justify-content:flex-end;gap:10px;padding:0 clamp(16px,4vw,48px);
+  background:rgba(250,249,246,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.tools .brand{margin-right:auto;font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--dim)}
+.tools button{background:transparent;border:1px solid var(--line2);border-radius:6px;
+  padding:5px 13px;font-size:12px;color:var(--sub);cursor:pointer;font-family:inherit}
+.tools button:hover{border-color:var(--acc);color:var(--acc)}
+.tools a{text-decoration:none}
+
+.page{max-width:1000px;margin:0 auto;padding:calc(44px + 46px) clamp(16px,4vw,48px) 70px}
+
+/* ============ 头部：左（头像+信息）/ 右（个人介绍） ============ */
+.head{padding-bottom:40px;border-bottom:1px solid var(--line)}
+.head-grid{display:grid;grid-template-columns:280px 1fr;gap:52px;align-items:start}
+
+/* 左栏 */
+.side-col{text-align:center}
+.portrait{width:132px;height:132px;margin:0 auto;border-radius:50%;overflow:hidden;
+  background:#f0f1ef;border:2px solid #fff;box-shadow:0 6px 24px rgba(20,30,40,.12)}
+.portrait img{width:100%;height:100%;object-fit:cover;object-position:50% 18%;display:block}
+.side-col h1{font-family:var(--serif);font-size:28px;font-weight:700;letter-spacing:.04em;
+  margin-top:16px;line-height:1.2}
+.contact{margin-top:14px;font-family:var(--mono);font-size:12px;color:var(--sub);line-height:1.9}
+.contact a{color:var(--sub);text-decoration:none;border-bottom:1px solid var(--line2)}
+.contact a:hover{color:var(--acc);border-color:var(--acc)}
+/* 右栏：个人介绍左对齐（浅灰底深字） */
+.intro{text-align:left;background:#f1f2f2;
+  padding:20px 22px}
+.intro-h{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.intro-h h2{font-family:var(--sans);font-size:20px;font-weight:700;letter-spacing:.01em;white-space:nowrap;color:var(--ink)}
+.intro-h .rule{flex:1;height:1px;background:var(--line)}
+.intro p{margin-bottom:14px;color:var(--sub);font-size:13.5px}
+.intro p:last-of-type{margin-bottom:0}
+.intro strong{color:var(--ink);font-weight:600}
+/* 教育背景：与工作经历同级的独立板块，标题居中、内容左对齐 */
+.edu-block{text-align:left}
+.edu-line{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 14px;
+  margin-bottom:10px;color:var(--sub);font-size:13.5px}
+.edu-line:last-of-type{margin-bottom:0}
+.edu-line strong{color:var(--ink);font-weight:600}
+.edu-date{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--dim);white-space:nowrap}
+.keys{display:flex;flex-wrap:wrap;justify-content:flex-start;gap:8px;margin-top:20px}
+.key{font-size:12px;color:var(--sub);background:var(--card);
+  border-radius:20px;padding:4px 13px}
+.key b{color:var(--acc);font-weight:600}
+
+/* ============ 工作经历 ============ */
+.sec-title{text-align:left;margin:44px 0 30px}
+.sec-title.sep{border-top:1px solid var(--line);padding-top:36px;margin-top:44px}
+.sec-title h2{font-family:var(--sans);font-size:20px;font-weight:700;letter-spacing:.01em;display:inline-block}
+.sec-title .en{font-family:var(--sans);font-size:11px;font-weight:500;letter-spacing:.12em;
+  color:var(--dim);margin-left:12px;vertical-align:2px}
+
+.job{position:relative;padding-left:22px;margin-bottom:34px}
+.job::before{content:'';position:absolute;left:0;top:18px;bottom:6px;width:2px;background:var(--line2)}
+.job::after{content:'';position:absolute;left:-2px;top:10px;width:6px;height:6px;border-radius:50%;
+  background:var(--acc)}
+.job-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 14px}
+.job-head .co{font-size:18px;font-weight:700;color:var(--ink)}
+.job-head .role{font-size:14px;color:var(--sub)}
+.job-head .date{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--dim);white-space:nowrap}
+
+.proj{margin-top:18px;padding:16px 18px;background:var(--card);border:1px solid var(--line);
+  border-radius:9px;box-shadow:0 2px 10px rgba(20,30,40,.03)}
+.proj h3{font-size:13.5px;font-weight:700;color:var(--acc);margin-bottom:10px;line-height:1.5}
+.proj .desc{color:var(--sub);font-size:13.5px;margin-bottom:10px}
+.pt{margin-bottom:9px;font-size:13.5px;color:var(--sub)}
+.pt:last-child{margin-bottom:0}
+.pt b{color:var(--ink);font-weight:600}
+.pt .num{color:var(--acc);font-weight:700}
+.plain .pt{margin-bottom:8px}
+
+/* 证书区（与工作经历同级的独立板块） */
+.certs-block{max-width:none;margin:0}
+.certs-block .certs{display:flex;flex-wrap:wrap;justify-content:flex-start;gap:10px}
+.certs-block .cert{font-size:13px;color:var(--acc);background:var(--acc-soft);
+  border:1px solid #dbe8f4;border-radius:6px;padding:6px 14px}
+
+.foot{margin-top:10px;padding-top:18px;border-top:1px solid var(--line);
+  font-family:var(--mono);font-size:11px;color:var(--dim);text-align:center}
+
+/* ============ 手机 ============ */
+@media(max-width:720px){
+  .tools .brand{display:none}
+  .page{padding-top:calc(44px + 28px)}
+  .head-grid{grid-template-columns:1fr;gap:30px}
+  .side-col{text-align:center}
+  .portrait{width:116px;height:116px}
+  .side-col h1{font-size:30px}
+  .side-meta{max-width:340px;margin:24px auto 0}
+  .job-head .date{margin-left:0;width:100%}
+  .edu-date{margin-left:0}
+  .proj{padding:14px}
+}
+
+/* ============ 打印 ============ */
+@media print{
+  body{background:#fff;font-size:11px}
+  .tools{display:none}
+  .page{max-width:none;padding:0}
+  .portrait{width:96px;height:96px}
+  .job,.proj{break-inside:avoid}
+}
+</style></head>
+<body>
+
+<div class="tools">
+  <span class="brand">SHEN JIAYAN · RESUME</span>
+  <a href="home.html"><button>← 返回首页</button></a>
+  <button onclick="window.print()">打印 / 存为 PDF</button>
+</div>
+
+<div class="page">
+
+  <!-- ============ 头部：左信息 / 右介绍 ============ -->
+  <header class="head">
+    <div class="head-grid">
+      <div class="side-col">
+        <div class="portrait"><img src="avatar.jpg" alt="沈佳燕"></div>
+        <h1>沈佳燕</h1>
+        <div class="contact">15221187804<br><a href="mailto:shenjiayan1025@126.com">shenjiayan1025@126.com</a></div>
+      </div>
+
+      <div class="intro">
+        <div class="intro-h"><h2>个人介绍</h2><span class="rule"></span></div>
+        <p><strong>7 年数据领域经验</strong>：数据资产商业化 1.5 年、数据治理 + BI 分析 2.5 年，并以治理体系为底座主导 <strong>AI 智能问数</strong> 落地、咨询与合规 3 年。</p>
+        <p>曾从 0 搭建公司数据仓库、建立数据质量校验体系，发起并亲自搭建公司首个 AI 问数智能体。建立一整套<strong>从数据治理到 AI 问数智能体的方法论</strong>，可供分享和探讨。</p>
+        <p>兼具个人信息保护和重要数据合规咨询经验，对数据质量与数据安全有体系级判断力。</p>
+        <div class="keys">
+          <span class="key"><b>数据治理</b></span>
+          <span class="key"><b>AI 问数</b></span>
+          <span class="key"><b>数据安全</b></span>
+          <span class="key"><b>数据资产</b></span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ 教育背景（与工作经历同级板块） ============ -->
+  <div class="sec-title"><h2>教育背景</h2><span class="en">EDUCATION</span></div>
+  <div class="edu-block">
+    <p class="edu-line"><span><strong>香港中文大学</strong> · 经济学-计量经济学 · 硕士</span><span class="edu-date">2017.08 – 2018.11</span></p>
+    <p class="edu-line"><span><strong>天津大学</strong> · 工程力学 · 本科</span><span class="edu-date">2012.09 – 2016.07</span></p>
+  </div>
+
+  <!-- ============ 工作经历 ============ -->
+  <div class="sec-title sep"><h2>工作经历</h2><span class="en">WORK EXPERIENCE</span></div>
+
+  <div class="job">
+    <div class="job-head">
+      <span class="co">亿咖通科技（ECARX）</span>
+      <span class="role">数据治理工程师</span>
+      <span class="date">2024.01 – 2026.10.31</span>
+    </div>
+
+    <div class="proj">
+      <h3>数据仓库与数据质量体系（从 0 搭建）</h3>
+      <div class="pt"><b>数据质量标准：</b>确定数据清洗规则——语义无损类清洗脚本全表默认生效，语义有损类逐字段经业务确认后应用；建立规范化的质量校验强弱分级工程标准——强规则（主键重复/空表）阻断入库，弱规则告警，校验是数据入库前的<span class="num">强制关卡而非事后报表</span>。</div>
+      <div class="pt"><b>归因治理：</b>区分源表问题与同步过程问题，例如定位「系统主键重复」为高频脏数据根因，推动强制每表明确主键的机制性根治，并将根因沉淀为常态质检规则——形成「现象定位 → 根因归因 → 机制根治 → 规则沉淀」的治理闭环。</div>
+      <div class="pt"><b>口径标准化：</b>对仓、表、字段定义做工程化治理，以「语义完整度」为评估维度；定义不清晰，大模型就难以精准解答和正确建模——治理成果直接作为 AI 问数智能体的知识底座。</div>
+      <div class="pt"><b>多源整合：</b>多系统与离线数据归集，搭建数据血缘，排查冗余，收敛数据口径不统一问题。</div>
+      <div class="pt"><b>自研报表：</b>DataWind + 飞书实现数据资产级权限控制；落地 HR 薪资看板（四维分析 + 聚合呈现 + 分级授权的隐私保护设计）。</div>
+    </div>
+
+    <div class="proj">
+      <h3>AI 问数智能体（发起人，从 0 到 1）—— 以数据治理成果为大模型应用底座</h3>
+      <div class="desc">从 0 搭建公司首个 AI 问数智能体（MySQL 对接 + 本地部署 + 飞书集成），设计面向全公司使用，局部开放中；典型场景：部门自助查询大模型网关 token 与费用消耗。</div>
+      <div class="pt"><b>数据字典索引：</b>设计表、字段与指标口径的知识组织结构，将数据字典组织为智能体可检索的知识库，保证问答口径与报表口径一致。</div>
+      <div class="pt"><b>用户使用和记忆设计：</b>单功能智能体规范查询步骤，以公司指标口径作为问答引导基准（先对齐口径、再生成答案）；设计个人用户记忆方案，按用户沉淀常用问法与查询偏好。</div>
+      <div class="pt"><b>合规三层闭环：</b>提示词编排 + 数据管控平台 + 数据申请链路；员工个人信息零开放、按组织架构分级授权；权限全生命周期管理（离职失效、调岗撤销）。</div>
+    </div>
+
+    <div class="proj">
+      <h3>IT 审计管理工具（产品与数据架构设计者）</h3>
+      <div class="pt">主导产品与数据架构设计，基于低代码平台（字节 Apass）实现：传统抽样审计 → <b>增量全量异常巡查</b>（系统变更合规、离职账号、异常登录等）——审计覆盖率从抽样提升到全量；具体开发实施由团队协作落地。</div>
+      <div class="pt">将「风险 → 控制 → 测试」审计方法论转化为严密的数据结构设计，审计工作有记录、可复制、可溯源、支持范围和时间维度完整性校验。</div>
+      <div class="pt">上线后审计团队以 <span class="num">2 人</span>配置支撑原 <span class="num">7 人</span>工作量，人均审计覆盖面提升 <span class="num">3.5 倍</span>。</div>
+    </div>
+  </div>
+
+  <div class="job">
+    <div class="job-head">
+      <span class="co">蚂蚁区块链科技（上海）</span>
+      <span class="role">数据中台产品经理及运营</span>
+      <span class="date">2021.12 – 2023.06</span>
+    </div>
+    <div class="proj plain">
+      <div class="pt"><b>合作伙伴准入体系（0 → 1，主导）：</b>从 0 搭建合作伙伴入驻管理流程与准入标准：企业层核验在诉风险、企业黑名单、社保缴纳人数、营业执照、真实营收规模；数据层核验数据使用授权、信息采集合规流程、政府背书；流程串联法务、合规、全面风险三方评估。累计接入合作伙伴 <span class="num">100+</span> 家（集团关联公司、省级政府数据开放国企、行业数据方），覆盖海关、电力、车辆、车辆保险、人社、信用等数据领域。</div>
+      <div class="pt"><b>数据资产管理与平台搭建（主导）：</b>管理 <span class="num">150+</span> 项数据资产的元数据体系：分类、敏感度、字段构成、覆盖范围、商业红线、合作模式与合作时限。</div>
+      <div class="pt"><b>解决数据授权颗粒度受限问题：</b>海关类数据仅覆盖特定港口的入出境企业交易金额，通过多省份数据对接拼出可用覆盖范围。</div>
+      <div class="pt"><b>数据变现模式设计：</b>设计并落地多种变现模式：API 按调用量收费、按收入比例分成、敏感数据脱敏后返回调用结果；打包多方数据形成评分类产品，与数据源方分润——面向城商行、信贷公司的小微企业贷款风险评估场景，完成商业化闭环跑通（<span class="num">月均回款数十万元</span>）。</div>
+      <div class="pt"><b>数据资产管理系统（0 → 1，主导）：</b>搭建内部数据资产地图，供产品设计方查看已接入合作伙伴的全部数据资产；流程、字段与状态机均由本人设计。</div>
+      <div class="pt"><b>数据商业化全链路平台（配合打造）：</b>参与入驻 → 评审 → 定价 → 商品上架 → 对外出售 → 回款端到端流程的系统化落地。</div>
+    </div>
+  </div>
+
+  <div class="job">
+    <div class="job-head">
+      <span class="co">德勤咨询（上海）</span>
+      <span class="role">高级咨询顾问</span>
+      <span class="date">2021.01 – 2021.12</span>
+    </div>
+    <div class="proj plain">
+      <div class="pt">负责多个数据合规项目，例如奢侈品客户数据治理、零售全渠道数据治理项目。</div>
+    </div>
+  </div>
+
+  <div class="job">
+    <div class="job-head">
+      <span class="co">毕马威咨询（上海）</span>
+      <span class="role">高级咨询顾问</span>
+      <span class="date">2018.12 – 2020.12</span>
+    </div>
+    <div class="proj plain">
+      <div class="pt">参与 <span class="num">20+</span> 家包括世界 500 强 IT 系统审计。</div>
+    </div>
+  </div>
+
+  <!-- 证书（与工作经历同级板块） -->
+  <div class="sec-title sep"><h2>证书</h2><span class="en">CERTIFICATES</span></div>
+  <div class="certs-block">
+    <div class="certs">
+      <span class="cert">数据治理工程师 CDGA</span>
+      <span class="cert">信息系统审计师 CISA</span>
+      <span class="cert">金融风险分析师 FRM</span>
+    </div>
+  </div>
+
+  <div class="foot">SHEN JIAYAN · RESUME</div>
+</div>
+</body></html>
